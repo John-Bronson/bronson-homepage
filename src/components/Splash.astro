@@ -1,0 +1,54 @@
+---
+import skull_logo from "../assets/skull_logo.png";
+---
+
+<div id="container">
+    <main>
+        <section id="primary">
+            <img id="skull_logo" src={skull_logo.src} alt="skull logo" />
+        </section>
+        <section id="socials">
+            <a href="https://bsky.app/profile/jbronson.bsky.social" aria-label="Visit my Bluesky profile">[bsky]</a>
+            <a href="https://toot.community/@victorsmonster" aria-label="Visit my Mastodon profile">[mastodon]</a>
+            <a href="https://github.com/John-Bronson" aria-label="Visit my Github profile">[github]</a>
+            <a href="mailto:jbronson@gmail.com" aria-label="Contact me via email">[email]</a>
+        </section>
+
+    </main>
+</div>
+
+<style>
+    #container {
+        font-family: Inter, Roboto, 'Helvetica Neue', 'Arial Nova', 'Nimbus Sans', Arial, sans-serif;
+        height: 100%;
+        background-color: black;
+    }
+
+    main {
+        //background-color: black;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+    }
+    #socials {
+        margin-top: 10px;
+        width: 500px;
+        color: white;
+        display: flex;
+        flex-direction: row;
+        justify-content: space-between;
+        font-family: monospace; /* Monospace font for the entire section */
+
+        a:link, a:visited {
+            color: #ddd9cc;
+            text-decoration: none;
+            font-weight: bold;
+        }
+    }
+    #skull_logo {
+        height: 500px;
+        width: 500px;
+    }
+</style>
