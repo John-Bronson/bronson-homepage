@@ -8,8 +8,7 @@ import skull_logo from "../assets/skull_logo.png";
             <!--<img id="skull_logo" src={skull_logo.src} alt="skull logo" />-->
         </section>
         <div>
-            <div id="ascii-container"
-                 style="color: white; font-family: 'Ubuntu Mono', monospace; white-space: pre;"></div>
+            <div id="ascii-container"></div>
         </div>
         <section id="socials">
             <a href="https://bsky.app/profile/jbronson.bsky.social" aria-label="Visit my Bluesky profile">[bsky]</a>
@@ -30,12 +29,18 @@ import skull_logo from "../assets/skull_logo.png";
 
     main {
         color: white;
-        //background-color: black;
         height: 100%;
         display: flex;
         flex-direction: column;
         align-items: center;
         justify-content: center;
+    }
+
+    #ascii-container {
+        font-size: 14px;
+        color: white;
+        font-family: 'Ubuntu Mono', monospace;
+        white-space: pre;
     }
 
     #socials {
@@ -58,9 +63,31 @@ import skull_logo from "../assets/skull_logo.png";
         height: 500px;
         width: 500px;
     }
+
+    @media (max-width: 600px) {
+        main {
+            font-size: 12px;
+        }
+
+        #socials {
+            width: 100%;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        #socials a {
+            margin: 5px 0;
+        }
+
+        @media (max-width: 400px) {
+            main {
+                font-size: 10px;
+            }
+        }
+    }
 </style>
 
-<script client:load>
+<script>
     let asciiArt = [
         [
             '.', ' ', '.', ' ', '.', ' ', '.', ' ', '.',
@@ -424,66 +451,16 @@ import skull_logo from "../assets/skull_logo.png";
         ]
     ]
 
-    let isRunning = false;
-
-    function startAsciiAnimation() {
-        if (isRunning) return; // Prevent starting multiple intervals
-        isRunning = true; // Set isRunning to true to allow the animation to start
-
-        const container = document.getElementById('ascii-container');
-        if (!container) {
-            console.error("Container element not found.");
-            return;
-        }
-
-        let intervalId = setInterval(() => {
-            if (!isRunning) return;
-
-            // Clear previous content
-            container.innerHTML = '';
-
-            // Render the ASCII art with animation
-            asciiArt.forEach((line, lineIndex) => {
-                const lineElement = document.createElement('div');
-                lineElement.textContent = line.join('');
-                container.appendChild(lineElement);
-
-                // Toggle characters for dynamic effects
-                asciiArt[lineIndex] = line.map((char) => {
-                    if (char === '@') return '*'; // Change '@' to '*'
-                    if (char === '*') return '@'; // Change '*' to '@'
-                    return char; // Leave other characters unchanged
-                });
-            });
-        }, 500);
+    // Render the ASCII art
+    const container = document.getElementById('ascii-container');
+    if (container) {
+        asciiArt.forEach((line, lineIndex) => {
+            const lineElement = document.createElement('div');
+            lineElement.textContent = line.join('');
+            container.appendChild(lineElement);
+        });
+    } else {
+        console.error("Container element not found. Could not render ASCII art.");
     }
 
-    startAsciiAnimation();
-
-    function stopAsciiAnimation() {
-        isRunning = false;
-        clearInterval(intervalId);
-        console.log("Animation stopped.");
-    }
-
-    function toggleAsciiAnimation() {
-        if (isRunning) {
-            stopAsciiAnimation();
-        } else {
-            startAsciiAnimation();
-        }
-    }
-
-    // Add keypress listener
-    document.addEventListener("keyup", (event) => {
-        if (event.key.toLowerCase() === "q") {
-            stopAsciiAnimation();
-        }
-        if (event.key.toLowerCase() === "s") {
-            startAsciiAnimation();
-        }
-        if (event.key.toLowerCase() === "t") {
-            toggleAsciiAnimation();
-        }
-    });
 </script>
