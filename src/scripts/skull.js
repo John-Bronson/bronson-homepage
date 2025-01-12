@@ -1,3 +1,5 @@
+import matrix from './skull_art.mjs';
+
 let asciiArt = [
     ['. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .'],
     ['. . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . . .'],
@@ -37,24 +39,51 @@ let asciiArt = [
     ['. . . . . . . . . . . . . . . . . . . . . . . . . @littlebitspace 06-21'],
 ];
 
-let isRunning = true;
+matrix.forEach((line, index) => {
+    console.log(line.join(''));
+});
 
-function stopLoopOnKeyPress(event) {
-    if (event.key.toLowerCase() === 'q') {
-        isRunning = false;
+
+let isRunning = false;
+let interval = null;
+
+export function startAsciiAnimation() {
+    if (isRunning) return;
+    isRunning = true;
+
+    const container = document.getElementById('ascii-container');
+    if (!container) {
+        console.error("Container element not found. Ensure the DOM is fully loaded.");
+        return;
     }
-}
 
-document.addEventListener('keydown', stopLoopOnKeyPress);
+    intervalId = setInterval(() => {
+        if (!isRunning) return;
 
+        container.innerHTML = ''; // Clear previous content
 
-
-async function runLoop() {
-    while (isRunning) {
         asciiArt.forEach(line => {
-            console.log(line.join(''));
+            const lineElement = document.createElement('div');
+            lineElement.textContent = line.join('');
+            container.appendChild(lineElement);
         });
 
-        await new Promise(resolve => setTimeout(resolve, 500)); // Adds a 500ms delay
+        asciiArt.forEach((line, index) => {
+            asciiArt[index] = line.map(char => (char === '@' ? '*' : '@'));
+        });
+    }, 500);
+}
+
+export function stopAsciiAnimation() {
+    isRunning = false;
+    clearInterval(intervalId);
+    console.log('animation stopped.')
+}
+
+export function toggleAsciiAnimation() {
+    if (isRunning) {
+        stopAsciiAnimation();
+    } else {
+        startAsciiAnimation();
     }
 }
