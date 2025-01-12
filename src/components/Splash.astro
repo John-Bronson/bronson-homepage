@@ -6,15 +6,15 @@ import skull_logo from "../assets/skull_logo.png";
     <main>
         <section id="primary">
             <!--<img id="skull_logo" src={skull_logo.src} alt="skull logo" />-->
-        </section>
-        <div>
-            <div id="ascii-container"></div>
-        </div>
-        <section id="socials">
-            <a href="https://bsky.app/profile/jbronson.bsky.social" aria-label="Visit my Bluesky profile">[bsky]</a>
-            <a href="https://toot.community/@victorsmonster" aria-label="Visit my Mastodon profile">[mastodon]</a>
-            <a href="https://github.com/John-Bronson" aria-label="Visit my Github profile">[github]</a>
-            <a href="mailto:jbronson@gmail.com" aria-label="Contact me via email">[email]</a>
+            <div>
+                <div id="ascii-container"></div>
+            </div>
+            <section id="socials">
+                <a href="https://bsky.app/profile/jbronson.bsky.social" aria-label="Visit my Bluesky profile">[bsky]</a>
+                <a href="https://toot.community/@victorsmonster" aria-label="Visit my Mastodon profile">[mastodon]</a>
+                <a href="https://github.com/John-Bronson" aria-label="Visit my Github profile">[github]</a>
+                <a href="mailto:jbronson@gmail.com" aria-label="Contact me via email">[email]</a>
+            </section>
         </section>
 
     </main>
@@ -34,10 +34,10 @@ import skull_logo from "../assets/skull_logo.png";
         flex-direction: column;
         align-items: center;
         justify-content: center;
+        font-size: 26px;
     }
 
     #ascii-container {
-        font-size: 14px;
         color: white;
         font-family: 'Ubuntu Mono', monospace;
         white-space: pre;
@@ -45,7 +45,7 @@ import skull_logo from "../assets/skull_logo.png";
 
     #socials {
         margin-top: 20px;
-        width: 500px;
+        width: 100%;
         color: white;
         display: flex;
         flex-direction: row;
@@ -64,8 +64,8 @@ import skull_logo from "../assets/skull_logo.png";
         width: 500px;
     }
 
-    @media (max-width: 600px) {
-        main {
+    @media (max-width: 930px) {
+        #ascii-container {
             font-size: 12px;
         }
 
@@ -79,9 +79,14 @@ import skull_logo from "../assets/skull_logo.png";
             margin: 5px 0;
         }
 
-        @media (max-width: 400px) {
-            main {
+        @media (max-width: 440px) {
+            #ascii-container {
                 font-size: 10px;
+            }
+        }
+        @media (max-width: 360px) {
+            #ascii-container {
+                font-size: 8px;
             }
         }
     }
