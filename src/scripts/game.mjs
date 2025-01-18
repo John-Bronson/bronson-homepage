@@ -471,8 +471,6 @@ function renderSkullArt() {
             lineElement.textContent = line.join('');
             container.appendChild(lineElement);
         });
-
-        console.log(asciiArt[0].length)
     } else {
         console.error("Container element not found. Could not render ASCII art.");
     }
