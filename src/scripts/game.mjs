@@ -1,22 +1,5 @@
 import * as ROT from 'rot-js';
 
-// Game configuration
-const config = {
-    width: 58,
-    height: 36,
-};
-
-// Initialize ROT.js display
-const display = new ROT.Display({
-    width: config.width,
-    height: config.height,
-    fontSize: 18,
-});
-
-// Game variables
-const player = { x: 10, y: 10, char: '@' };
-const map = new Set();
-
 // Render the game
 function startGameRender() {
     // document.body.appendChild(display.getContainer());
@@ -29,13 +12,46 @@ function startGameRender() {
     }
 }
 
+// Game configuration
+const config = {
+    width: 58,
+    height: 37,
+};
+
+// Initialize ROT.js display
+const display = new ROT.Display({
+    width: config.width,
+    height: config.height,
+    fontSize: 18
+});
+
+// Game variables
+const map = new Set();
+const player = { x: 10, y: 10, char: '@' };
+
 // Generate a simple random dungeon map
 function generateMap() {
     const digger = new ROT.Map.Digger(config.width, config.height);
     digger.create((x, y, wall) => {
         if (!wall) map.add(`${x},${y}`);
     });
+    setPlayerPosition();
 }
+
+function setPlayerPosition() {
+    let foundIt = false;
+    while (!foundIt) {
+        const x = Math.floor(Math.random() * config.width);
+        const y = Math.floor(Math.random() * config.height);
+        if (map.has(`${x},${y}`)) {
+            player.x = x;
+            player.y = y;
+            foundIt = true;
+        }
+    }
+}
+
+
 
 // Draw the map
 function drawMap() {
