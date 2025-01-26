@@ -26,9 +26,10 @@ const display = new ROT.Display({
 });
 
 // Game variables
-ROT.RNG.setSeed(52123134);
+// ROT.RNG.setSeed(52123134);
 const map = new Map();
-const player = {x: 10, y: 10, char: '@'};
+const player = {x: 10, y: 10, char: '@', fg:'#0f0'};
+const bat = {x: 10, y: 10, char: 'B', fg: '#f00'};
 let gameStarted = false;
 
 // Generate a simple random dungeon map
@@ -39,22 +40,22 @@ function generateMap() {
             walkable: !wall,
             description: wall ? 'Wall' : 'Floor',
             char: wall ? '#' : '.',
-            fg: wall ? '#666': '#333',
+            fg: wall ? '#666' : '#333',
             bg: '#000'
         });
     });
-    startingPlayerPosition();
+
+    [player.x, player.y] = findBlankPosition();
+    [bat.x, bat.y] = findBlankPosition();
 }
 
-function startingPlayerPosition() {
+function findBlankPosition() {
     let foundIt = false;
     while (!foundIt) {
         const x = Math.floor(ROT.RNG.getUniform() * config.width);
         const y = Math.floor(ROT.RNG.getUniform() * config.height);
-        if (map.has(`${x},${y}`)) {
-            player.x = x;
-            player.y = y;
-            foundIt = true;
+        if (map.get(`${x},${y}`.toString()).walkable) {
+            return [x,y];
         }
     }
 }
@@ -66,7 +67,9 @@ function drawMap() {
         display.draw(x, y, value.char, value.fg, value.bg);
 
     });
-    display.draw(player.x, player.y, player.char, '#0f0'); // Player
+    display.draw(bat.x, bat.y, bat.char, bat.fg)
+    display.draw(player.x, player.y, player.char, player.fg); // Player
+
 }
 
 function movePlayer(dx, dy) {
