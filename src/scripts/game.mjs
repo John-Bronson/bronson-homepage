@@ -27,7 +27,8 @@ const display = new ROT.Display({
 
 // Game variables
 const map = new Set();
-const player = { x: 10, y: 10, char: '@' };
+const player = {x: 10, y: 10, char: '@'};
+let gameStarted = false;
 
 // Generate a simple random dungeon map
 function generateMap() {
@@ -35,10 +36,10 @@ function generateMap() {
     digger.create((x, y, wall) => {
         if (!wall) map.add(`${x},${y}`);
     });
-    setPlayerPosition();
+    startingPlayerPosition();
 }
 
-function setPlayerPosition() {
+function startingPlayerPosition() {
     let foundIt = false;
     while (!foundIt) {
         const x = Math.floor(Math.random() * config.width);
@@ -51,9 +52,6 @@ function setPlayerPosition() {
     }
 }
 
-
-
-// Draw the map
 function drawMap() {
     display.clear();
     map.forEach((tile) => {
@@ -63,7 +61,6 @@ function drawMap() {
     display.draw(player.x, player.y, player.char, '#0f0'); // Player
 }
 
-// Handle player movement
 function movePlayer(dx, dy) {
     const newX = player.x + dx;
     const newY = player.y + dy;
@@ -94,27 +91,30 @@ function handleInput(event) {
 
 // Game initialization
 export function init() {
-    startGameRender();
-    generateMap();
-    drawMap();
-    window.addEventListener('keydown', handleInput);
+    if (!gameStarted) {
+        startGameRender();
+        generateMap();
+        drawMap();
+        window.addEventListener('keydown', handleInput);
+        gameStarted = true;
+    }
+
 }
-
-// Start the game
-renderSkullArt()
-// init();
-
 
 function renderSkullArt() {
 
     // Wait for the DOM to load
     window.addEventListener('DOMContentLoaded', () => {
-        const asciiContainer = document.getElementById('ascii-container');
+        if (!gameStarted) {
+            const asciiContainer = document.getElementById('ascii-container');
 
-        // Attach the click event to the container
-        asciiContainer.addEventListener('click', () => {
-            init(); // Run the game initialization whenever the container is clicked
-        });
+            // Attach the click event to the container
+            asciiContainer.addEventListener('click', () => {
+                init(); // Run the game initialization whenever the container is clicked
+            });
+
+        }
+
     });
 
     let asciiArt = [
@@ -491,3 +491,6 @@ function renderSkullArt() {
         console.error("Container element not found. Could not render ASCII art.");
     }
 }
+
+// Start the game
+renderSkullArt()
