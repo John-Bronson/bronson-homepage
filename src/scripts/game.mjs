@@ -26,7 +26,8 @@ const display = new ROT.Display({
 });
 
 // Game variables
-const map = new Set();
+ROT.RNG.setSeed(52123134);
+const map = new Map();
 const player = {x: 10, y: 10, char: '@'};
 let gameStarted = false;
 
@@ -34,7 +35,13 @@ let gameStarted = false;
 function generateMap() {
     const digger = new ROT.Map.Digger(config.width, config.height);
     digger.create((x, y, wall) => {
-        if (!wall) map.add(`${x},${y}`);
+        map.set(`${x},${y}`, {
+            walkable: !wall,
+            description: wall ? 'Wall' : 'Floor',
+            char: wall ? '#' : '.',
+            fg: wall ? '#666': '#333',
+            bg: '#000'
+        });
     });
     startingPlayerPosition();
 }
@@ -42,8 +49,8 @@ function generateMap() {
 function startingPlayerPosition() {
     let foundIt = false;
     while (!foundIt) {
-        const x = Math.floor(Math.random() * config.width);
-        const y = Math.floor(Math.random() * config.height);
+        const x = Math.floor(ROT.RNG.getUniform() * config.width);
+        const y = Math.floor(ROT.RNG.getUniform() * config.height);
         if (map.has(`${x},${y}`)) {
             player.x = x;
             player.y = y;
@@ -54,9 +61,10 @@ function startingPlayerPosition() {
 
 function drawMap() {
     display.clear();
-    map.forEach((tile) => {
-        const [x, y] = tile.split(',').map(Number);
-        display.draw(x, y, '.', '#444'); // Floor
+    map.forEach((value, key) => {
+        const [x, y] = key.split(',').map(Number);
+        display.draw(x, y, value.char, value.fg, value.bg);
+
     });
     display.draw(player.x, player.y, player.char, '#0f0'); // Player
 }
@@ -64,7 +72,10 @@ function drawMap() {
 function movePlayer(dx, dy) {
     const newX = player.x + dx;
     const newY = player.y + dy;
-    if (map.has(`${newX},${newY}`)) {
+
+    const movingTo = map.get(`${newX},${newY}`.toString());
+
+    if (map.get(`${newX},${newY}`.toString()).walkable) {
         player.x = newX;
         player.y = newY;
     }
