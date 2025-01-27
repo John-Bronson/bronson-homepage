@@ -27,10 +27,45 @@ const display = new ROT.Display({
 
 // Game variables
 // ROT.RNG.setSeed(52123134);
+console.log('RNG seed is: ', ROT.RNG.getSeed())
 const map = new Map();
-const player = {x: 10, y: 10, char: '@', fg:'#0f0'};
-const bat = {x: 10, y: 10, char: 'B', fg: '#f00'};
+const entityList: Entity[] = [];
 let gameStarted = false;
+let player: Entity;
+
+
+class Entity {
+    x: number;
+    y: number;
+    char: string;
+    fg: string;
+    bg: string;
+
+    constructor(char: string, fg: string, bg: string) {
+        const [x, y] = findBlankPosition();
+        this.x = x;
+        this.y = y;
+
+        this.char = char;
+        this.fg = fg;
+        this.bg = bg;
+    }
+
+    public move(xIndex: number, yIndex: number) {
+        const xToMove = this.x + xIndex;
+        const yToMove = this.y + yIndex;
+
+
+        if (map.get(`${xToMove},${yToMove}`.toString()).walkable) {
+            this.x += xIndex;
+            this.y += yIndex;
+        } else {
+            console.log('Cannot move to that location');
+        }
+
+
+    }
+}
 
 // Generate a simple random dungeon map
 function generateMap() {
@@ -44,9 +79,13 @@ function generateMap() {
             bg: '#000'
         });
     });
+}
 
-    [player.x, player.y] = findBlankPosition();
-    [bat.x, bat.y] = findBlankPosition();
+function placeEntities() {
+    player = new Entity('@', '#0f0', '#000');
+    const bat = new Entity('b', '#f00', '#000');
+    entityList.push(player);
+    entityList.push(bat)
 }
 
 function findBlankPosition() {
@@ -54,8 +93,15 @@ function findBlankPosition() {
     while (!foundIt) {
         const x = Math.floor(ROT.RNG.getUniform() * config.width);
         const y = Math.floor(ROT.RNG.getUniform() * config.height);
+
+        // find a floor tile
         if (map.get(`${x},${y}`.toString()).walkable) {
-            return [x,y];
+            // check to see if any entities currently occupy this floor tile
+            let entityFound = entityList.some(entity => entity.x === x && entity.y === y);
+            if (!entityFound) {
+                foundIt = true;
+                return [x, y];
+            }
         }
     }
 }
@@ -67,8 +113,12 @@ function drawMap() {
         display.draw(x, y, value.char, value.fg, value.bg);
 
     });
-    display.draw(bat.x, bat.y, bat.char, bat.fg)
-    display.draw(player.x, player.y, player.char, player.fg); // Player
+
+    entityList.forEach(entity => {
+        display.draw(entity.x, entity.y, entity.char, entity.fg, entity.bg);
+    })
+    // display.draw(bat.x, bat.y, bat.char, bat.fg)
+    // display.draw(player.x, player.y, player.char, player.fg); // Player
 
 }
 
@@ -88,16 +138,16 @@ function movePlayer(dx, dy) {
 function handleInput(event) {
     switch (event.key) {
         case 'ArrowUp':
-            movePlayer(0, -1);
+            player.move(0, -1);
             break;
         case 'ArrowDown':
-            movePlayer(0, 1);
+            player.move(0, 1);
             break;
         case 'ArrowLeft':
-            movePlayer(-1, 0);
+            player.move(-1, 0);
             break;
         case 'ArrowRight':
-            movePlayer(1, 0);
+            player.move(1, 0);
             break;
     }
     drawMap();
@@ -106,8 +156,9 @@ function handleInput(event) {
 // Game initialization
 export function init() {
     if (!gameStarted) {
-        startGameRender();
         generateMap();
+        placeEntities();
+        startGameRender();
         drawMap();
         window.addEventListener('keydown', handleInput);
         gameStarted = true;
