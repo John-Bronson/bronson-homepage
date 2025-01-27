@@ -33,7 +33,6 @@ const entityList: Entity[] = [];
 let gameStarted = false;
 let player: Entity;
 
-
 class Entity {
     x: number;
     y: number;
@@ -86,6 +85,14 @@ function placeEntities() {
     const bat = new Entity('b', '#f00', '#000');
     entityList.push(player);
     entityList.push(bat)
+
+    for (let i = 0; i < 10; i++) {
+        const coin = new Entity('$', '#FFFF00', '#000');
+        entityList.push(coin);
+    }
+
+    const stairs = new Entity('>', '#00f', '#000');
+    entityList.push(stairs);
 }
 
 function findBlankPosition() {
@@ -117,9 +124,6 @@ function drawMap() {
     entityList.forEach(entity => {
         display.draw(entity.x, entity.y, entity.char, entity.fg, entity.bg);
     })
-    // display.draw(bat.x, bat.y, bat.char, bat.fg)
-    // display.draw(player.x, player.y, player.char, player.fg); // Player
-
 }
 
 function movePlayer(dx, dy) {
