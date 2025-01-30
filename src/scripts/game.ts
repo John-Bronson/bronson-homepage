@@ -33,6 +33,7 @@ const map = new Map();
 const entityList: Entity[] = [];
 let gameStarted = false;
 let player: Entity;
+let bat: Entity;
 
 class Entity {
     x: number;
@@ -67,6 +68,27 @@ class Entity {
     }
 }
 
+class Bat extends Entity {
+    public move() {
+        const rando = ROT.RNG.getUniform();
+        console.log('bat tryna move')
+
+        if (rando > 0 && rando < 0.25) {
+            // move north
+            this.y += -1;
+        } else if (rando > 0.25 && rando < 0.5) {
+            // move east
+            this.x += 1;
+        } else if (rando > 0.5 && rando < 0.75) {
+            // move south
+            this.y += 1;
+        } else if (rando > 0.75) {
+            // move west
+            this.x -= 1;
+        }
+    }
+}
+
 // Generate a simple random dungeon map
 function generateMap() {
     const digger = new ROT.Map.Digger(config.width, config.height);
@@ -83,7 +105,7 @@ function generateMap() {
 
 function placeEntities() {
     player = new Entity('@', '#0f0', '#000');
-    const bat = new Entity('b', '#f00', '#000');
+    bat = new Bat('b', '#f00', '#000');
     entityList.push(player);
     entityList.push(bat)
 
@@ -115,6 +137,7 @@ function findBlankPosition() {
 }
 
 function drawMap() {
+    bat.move(0,0);
     display.clear();
     map.forEach((value, key) => {
         const [x, y] = key.split(',').map(Number);
