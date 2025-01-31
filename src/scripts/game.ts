@@ -58,6 +58,7 @@ class Entity {
 class Player extends Entity {
     constructor() {
         super('@', '#0f0', '#000', 'player');
+        this.coins = 0;
     }
 
     coins: number;
@@ -66,9 +67,20 @@ class Player extends Entity {
         const xToMove = this.x + xIndex;
         const yToMove = this.y + yIndex;
 
+        const entityAtPosition = entityList.find(entity => entity.x === xToMove && entity.y === yToMove)
+
+        if (entityAtPosition && entityAtPosition.type === 'coin') {
+            this.coins += 1;
+            console.log(`you got a coin! You now have ${this.coins} coins.`)
+
+            const indexToDelete = entityList.findIndex(entity =>  entity.x === xToMove && entity.y === yToMove)
+            entityList.splice(indexToDelete,1);
+        }
+
         if (map.get(`${xToMove},${yToMove}`.toString()).walkable) {
             this.x += xIndex;
             this.y += yIndex;
+
         } else {
             console.log('Cannot move to that location');
         }
@@ -78,7 +90,10 @@ class Player extends Entity {
 class Bat extends Entity {
     constructor() {
         super('b', '#f00', '#000', 'bat')
+        this.coins = 0;
     }
+
+    coins: number;
 
     public move() {
         const rando = ROT.RNG.getUniform();
