@@ -41,8 +41,9 @@ class Entity {
     char: string;
     fg: string;
     bg: string;
+    type: string;
 
-    constructor(char: string, fg: string, bg: string) {
+    constructor(char: string, fg: string, bg: string, type: string) {
         const [x, y] = findBlankPosition();
         this.x = x;
         this.y = y;
@@ -50,12 +51,20 @@ class Entity {
         this.char = char;
         this.fg = fg;
         this.bg = bg;
+        this.type = type;
     }
+}
+
+class Player extends Entity {
+    constructor() {
+        super('@', '#0f0', '#000', 'player');
+    }
+
+    coins: number;
 
     public move(xIndex: number, yIndex: number) {
         const xToMove = this.x + xIndex;
         const yToMove = this.y + yIndex;
-
 
         if (map.get(`${xToMove},${yToMove}`.toString()).walkable) {
             this.x += xIndex;
@@ -63,12 +72,14 @@ class Entity {
         } else {
             console.log('Cannot move to that location');
         }
-
-
     }
 }
 
 class Bat extends Entity {
+    constructor() {
+        super('b', '#f00', '#000', 'bat')
+    }
+
     public move() {
         const rando = ROT.RNG.getUniform();
 
@@ -116,17 +127,17 @@ function generateMap() {
 }
 
 function placeEntities() {
-    player = new Entity('@', '#0f0', '#000');
-    bat = new Bat('b', '#f00', '#000');
+    player = new Player();
+    bat = new Bat();
     entityList.push(player);
     entityList.push(bat)
 
     for (let i = 0; i < 10; i++) {
-        const coin = new Entity('$', '#FFFF00', '#000');
+        const coin = new Entity('$', '#FFFF00', '#000', 'coin');
         entityList.push(coin);
     }
 
-    const stairs = new Entity('>', '#00f', '#000');
+    const stairs = new Entity('>', '#00f', '#000', 'stairs');
     entityList.push(stairs);
 }
 
@@ -148,13 +159,17 @@ function findBlankPosition() {
     }
 }
 
-function drawMap() {
+function handleTurn(x: number, y: number) {
+    player.move(x, y);
     bat.move();
+    drawMap();
+}
+
+function drawMap() {
     display.clear();
     map.forEach((value, key) => {
         const [x, y] = key.split(',').map(Number);
         display.draw(x, y, value.char, value.fg, value.bg);
-
     });
 
     entityList.forEach(entity => {
@@ -178,16 +193,16 @@ function movePlayer(dx, dy) {
 function handleInput(event) {
     switch (event.key) {
         case 'ArrowUp':
-            player.move(0, -1);
+            handleTurn(0, -1);
             break;
         case 'ArrowDown':
-            player.move(0, 1);
+            handleTurn(0, 1);
             break;
         case 'ArrowLeft':
-            player.move(-1, 0);
+            handleTurn(-1, 0);
             break;
         case 'ArrowRight':
-            player.move(1, 0);
+            handleTurn(1, 0);
             break;
     }
     drawMap();
