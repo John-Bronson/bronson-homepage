@@ -33,7 +33,7 @@ const map = new Map();
 const entityList: Entity[] = [];
 let gameStarted = false;
 let player: Entity;
-let bat: Entity;
+let bat: Bat;
 
 class Entity {
     x: number;
@@ -71,20 +71,32 @@ class Entity {
 class Bat extends Entity {
     public move() {
         const rando = ROT.RNG.getUniform();
-        console.log('bat tryna move')
+
+        let dx = 0;
+        let dy = 0;
 
         if (rando > 0 && rando < 0.25) {
             // move north
-            this.y += -1;
+            dy += -1;
         } else if (rando > 0.25 && rando < 0.5) {
             // move east
-            this.x += 1;
+            dx += 1;
         } else if (rando > 0.5 && rando < 0.75) {
             // move south
-            this.y += 1;
+            dy += 1;
         } else if (rando > 0.75) {
             // move west
-            this.x -= 1;
+            dx -= 1;
+        }
+
+        const xToMove = this.x + dx;
+        const yToMove = this.y + dy;
+
+        // Check if the move is valid
+
+        if (map.get(`${xToMove},${yToMove}`.toString()).walkable) {
+            this.x = xToMove;
+            this.y = yToMove;
         }
     }
 }
@@ -137,7 +149,7 @@ function findBlankPosition() {
 }
 
 function drawMap() {
-    bat.move(0,0);
+    bat.move();
     display.clear();
     map.forEach((value, key) => {
         const [x, y] = key.split(',').map(Number);
