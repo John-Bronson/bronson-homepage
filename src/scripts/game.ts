@@ -70,13 +70,23 @@ class Player extends Entity {
 
         const entityAtPosition = entityList.find(entity => entity.x === xToMove && entity.y === yToMove)
 
-        if (entityAtPosition && entityAtPosition.type === 'coin') {
-            this.coins += 1;
-            console.log(`you got a coin! You now have ${this.coins} coins.`)
-            lastMessage = `you got a coin! You now have ${this.coins} coins.`
+        if (entityAtPosition) {
+            switch (entityAtPosition.type) {
+                case 'coin':
+                    this.coins += 1;
+                    console.log(`you got a coin! You now have ${this.coins} coins.`)
+                    lastMessage = `you got a coin! You now have ${this.coins} coins.`
 
-            const indexToDelete = entityList.findIndex(entity => entity.x === xToMove && entity.y === yToMove)
-            entityList.splice(indexToDelete, 1);
+                    const indexToDelete = entityList.findIndex(entity => entity.x === xToMove && entity.y === yToMove)
+                    entityList.splice(indexToDelete, 1);
+                    break;
+                case 'bat':
+                    lastMessage = 'You touch a bat!';
+                    break;
+                case 'stairs':
+                    lastMessage = 'You found the stairs!';
+                    break;
+            }
         }
 
         if (map.get(`${xToMove},${yToMove}`.toString()).walkable) {
@@ -84,7 +94,7 @@ class Player extends Entity {
             this.y += yIndex;
 
         } else {
-            console.log('Cannot move to that location');
+            lastMessage = 'You bump into a wall.';
         }
     }
 }
@@ -193,8 +203,8 @@ function drawMap() {
         display.draw(entity.x, entity.y, entity.char, entity.fg, entity.bg);
     })
 
-    display.drawText(0,33,`Coins: ${player.coins}`);
-    display.drawText(0,34,lastMessage);
+    display.drawText(0, 33, `Coins: ${player.coins}`);
+    display.drawText(0, 34, lastMessage);
 }
 
 function movePlayer(dx, dy) {
