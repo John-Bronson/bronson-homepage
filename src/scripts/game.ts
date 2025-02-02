@@ -16,13 +16,13 @@ function startGameRender() {
 // Game configuration
 const config = {
     width: 58,
-    height: 37,
+    height: 33,
 };
 
 // Initialize ROT.js display
 const display = new ROT.Display({
     width: config.width,
-    height: config.height,
+    height: config.height + 4,
     fontSize: 18
 });
 
@@ -34,6 +34,7 @@ const entityList: Entity[] = [];
 let gameStarted = false;
 let player: Entity;
 let bat: Bat;
+let lastMessage = '';
 
 class Entity {
     x: number;
@@ -72,6 +73,7 @@ class Player extends Entity {
         if (entityAtPosition && entityAtPosition.type === 'coin') {
             this.coins += 1;
             console.log(`you got a coin! You now have ${this.coins} coins.`)
+            lastMessage = `you got a coin! You now have ${this.coins} coins.`
 
             const indexToDelete = entityList.findIndex(entity => entity.x === xToMove && entity.y === yToMove)
             entityList.splice(indexToDelete, 1);
@@ -191,7 +193,8 @@ function drawMap() {
         display.draw(entity.x, entity.y, entity.char, entity.fg, entity.bg);
     })
 
-    display.drawText(1,1,`Coins: ${player.coins}`)
+    display.drawText(0,33,`Coins: ${player.coins}`);
+    display.drawText(0,34,lastMessage);
 }
 
 function movePlayer(dx, dy) {
