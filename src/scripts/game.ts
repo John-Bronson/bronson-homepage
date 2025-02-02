@@ -107,35 +107,86 @@ class Bat extends Entity {
 
     coins: number;
 
-    public move() {
-        const rando = ROT.RNG.getUniform();
+    private findClosestCoin(): Entity {
+        let closestCoin: Entity;
+        let shortestDistance = Infinity;
 
-        let dx = 0;
-        let dy = 0;
+        for (const currentEntity of entityList) {
+            if (currentEntity.type === 'coin') {
+                const distance =
+                    Math.abs(this.x - currentEntity.x) +
+                    Math.abs(this.y - currentEntity.y);
 
-        if (rando > 0 && rando < 0.25) {
-            // move north
-            dy += -1;
-        } else if (rando > 0.25 && rando < 0.5) {
-            // move east
-            dx += 1;
-        } else if (rando > 0.5 && rando < 0.75) {
-            // move south
-            dy += 1;
-        } else if (rando > 0.75) {
-            // move west
-            dx -= 1;
+                if (distance < shortestDistance) {
+                    shortestDistance = distance;
+                    closestCoin = currentEntity;
+                }
+            }
         }
 
-        const xToMove = this.x + dx;
-        const yToMove = this.y + dy;
+        return closestCoin;
+    }
 
-        // Check if the move is valid
+    public move() {
+        const closestCoin = this.findClosestCoin();
 
-        if (map.get(`${xToMove},${yToMove}`.toString()).walkable) {
+        if (closestCoin) {
+            const dx = closestCoin.x - this.x;
+            const dy = closestCoin.y - this.y;
+
+            const xStep = dx !== 0 ? dx / Math.abs(dx) : 0;
+            const yStep = dy !== 0 ? dy / Math.abs(dy) : 0;
+
+            const xToMove = this.x + xStep;
+            const yToMove = this.y + yStep;
+
+            // TODO: Check for valid movement. For now he'll be a ghost that goes through the walls
+
+            // if moving onto the coin, grab it
+
+            const entityAtPosition = entityList.find(entity => entity.x === xToMove && entity.y === yToMove)
+
+            if (entityAtPosition) {
+                switch (entityAtPosition.type) {
+                    case 'coin':
+                        this.coins += 1;
+                        const indexToDelete = entityList.findIndex(entity => entity.x === xToMove && entity.y === yToMove)
+                        entityList.splice(indexToDelete, 1);
+                }
+            }
+
             this.x = xToMove;
             this.y = yToMove;
         }
+
+        // const rando = ROT.RNG.getUniform();
+        //
+        // let dx = 0;
+        // let dy = 0;
+        //
+        // if (rando > 0 && rando < 0.25) {
+        //     // move north
+        //     dy += -1;
+        // } else if (rando > 0.25 && rando < 0.5) {
+        //     // move east
+        //     dx += 1;
+        // } else if (rando > 0.5 && rando < 0.75) {
+        //     // move south
+        //     dy += 1;
+        // } else if (rando > 0.75) {
+        //     // move west
+        //     dx -= 1;
+        // }
+        //
+        // const xToMove = this.x + dx;
+        // const yToMove = this.y + dy;
+        //
+        // // Check if the move is valid
+        //
+        // if (map.get(`${xToMove},${yToMove}`.toString()).walkable) {
+        //     this.x = xToMove;
+        //     this.y = yToMove;
+        // }
     }
 }
 
@@ -203,21 +254,22 @@ function drawMap() {
         display.draw(entity.x, entity.y, entity.char, entity.fg, entity.bg);
     })
 
-    display.drawText(0, 33, `Coins: ${player.coins}`);
-    display.drawText(0, 34, lastMessage);
+    display.drawText(0, 33, `Your Coins: ${player.coins}`);
+    display.drawText(0, 34, ` Bat Coins: ${bat.coins}`);
+    display.drawText(0, 35, lastMessage);
 }
 
-function movePlayer(dx, dy) {
-    const newX = player.x + dx;
-    const newY = player.y + dy;
-
-    const movingTo = map.get(`${newX},${newY}`.toString());
-
-    if (map.get(`${newX},${newY}`.toString()).walkable) {
-        player.x = newX;
-        player.y = newY;
-    }
-}
+// function movePlayer(dx, dy) {
+//     const newX = player.x + dx;
+//     const newY = player.y + dy;
+//
+//     const movingTo = map.get(`${newX},${newY}`.toString());
+//
+//     if (map.get(`${newX},${newY}`.toString()).walkable) {
+//         player.x = newX;
+//         player.y = newY;
+//     }
+// }
 
 // Handle input
 function handleInput(event: Event) {
