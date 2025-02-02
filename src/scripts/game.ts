@@ -73,8 +73,8 @@ class Player extends Entity {
             this.coins += 1;
             console.log(`you got a coin! You now have ${this.coins} coins.`)
 
-            const indexToDelete = entityList.findIndex(entity =>  entity.x === xToMove && entity.y === yToMove)
-            entityList.splice(indexToDelete,1);
+            const indexToDelete = entityList.findIndex(entity => entity.x === xToMove && entity.y === yToMove)
+            entityList.splice(indexToDelete, 1);
         }
 
         if (map.get(`${xToMove},${yToMove}`.toString()).walkable) {
@@ -190,6 +190,8 @@ function drawMap() {
     entityList.forEach(entity => {
         display.draw(entity.x, entity.y, entity.char, entity.fg, entity.bg);
     })
+
+    display.drawText(1,1,`Coins: ${player.coins}`)
 }
 
 function movePlayer(dx, dy) {
@@ -205,7 +207,7 @@ function movePlayer(dx, dy) {
 }
 
 // Handle input
-function handleInput(event) {
+function handleInput(event: Event) {
     switch (event.key) {
         case 'ArrowUp':
             handleTurn(0, -1);
@@ -243,10 +245,11 @@ function renderSkullArt() {
             const asciiContainer = document.getElementById('ascii-container');
 
             // Attach the click event to the container
-            asciiContainer.addEventListener('click', () => {
-                init(); // Run the game initialization when the container is clicked
-            });
-
+            if (asciiContainer) {
+                asciiContainer.addEventListener('click', () => {
+                    init(); // Run the game initialization when the container is clicked
+                });
+            }
         }
 
     });
