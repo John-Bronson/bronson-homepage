@@ -107,7 +107,7 @@ class Bat extends Entity {
 
     coins: number;
 
-    private findClosestCoin(): Entity {
+    public findClosestCoin(): Entity {
         let closestCoin: Entity;
         let shortestDistance = Infinity;
 
@@ -127,66 +127,87 @@ class Bat extends Entity {
         return closestCoin;
     }
 
-    public move() {
-        const closestCoin = this.findClosestCoin();
+    private getPathfindingStep() {
+        // test out that Dijkstra shit
 
-        if (closestCoin) {
-            const dx = closestCoin.x - this.x;
-            const dy = closestCoin.y - this.y;
+        let closestCoin = this.findClosestCoin();
 
-            const xStep = dx !== 0 ? dx / Math.abs(dx) : 0;
-            const yStep = dy !== 0 ? dy / Math.abs(dy) : 0;
+        let batPath = new ROT.Path.Dijkstra(closestCoin.x, closestCoin.y, (x, y) => {
+                return map.get(`${x},${y}`.toString()).walkable;
+            },
+            {
+                topology: 4
+            })
 
-            const xToMove = this.x + xStep;
-            const yToMove = this.y + yStep;
+        const batMovesArray: [number, number][] = [];
 
-            // TODO: Check for valid movement. For now he'll be a ghost that goes through the walls
+        batPath.compute(bat.x, bat.y, (x, y) => {
+            display.drawText(x, y, 'o');
+            batMovesArray.push([x, y])
+        })
 
-            // if moving onto the coin, grab it
+        console.log('batMovesArray: ', batMovesArray);
+        return batMovesArray[1];
+    }
 
-            const entityAtPosition = entityList.find(entity => entity.x === xToMove && entity.y === yToMove)
+    private getRandomStep(): [number, number] {
+        const rando = ROT.RNG.getUniform();
 
-            if (entityAtPosition) {
-                switch (entityAtPosition.type) {
-                    case 'coin':
-                        this.coins += 1;
-                        const indexToDelete = entityList.findIndex(entity => entity.x === xToMove && entity.y === yToMove)
-                        entityList.splice(indexToDelete, 1);
-                }
-            }
+        let dx = 0;
+        let dy = 0;
+        let xToMove = this.x;
+        let yToMove = this.y;
 
-            this.x = xToMove;
-            this.y = yToMove;
+        if (rando > 0 && rando < 0.25) {
+            // move north
+            dy += -1;
+        } else if (rando > 0.25 && rando < 0.5) {
+            // move east
+            dx += 1;
+        } else if (rando > 0.5 && rando < 0.75) {
+            // move south
+            dy += 1;
+        } else if (rando > 0.75) {
+            // move west
+            dx -= 1;
         }
 
-        // const rando = ROT.RNG.getUniform();
-        //
-        // let dx = 0;
-        // let dy = 0;
-        //
-        // if (rando > 0 && rando < 0.25) {
-        //     // move north
-        //     dy += -1;
-        // } else if (rando > 0.25 && rando < 0.5) {
-        //     // move east
-        //     dx += 1;
-        // } else if (rando > 0.5 && rando < 0.75) {
-        //     // move south
-        //     dy += 1;
-        // } else if (rando > 0.75) {
-        //     // move west
-        //     dx -= 1;
-        // }
-        //
-        // const xToMove = this.x + dx;
-        // const yToMove = this.y + dy;
-        //
-        // // Check if the move is valid
-        //
-        // if (map.get(`${xToMove},${yToMove}`.toString()).walkable) {
-        //     this.x = xToMove;
-        //     this.y = yToMove;
-        // }
+        xToMove = this.x + dx;
+        yToMove = this.y + dy;
+
+        // Move only if valid
+        if (map.get(`${xToMove},${yToMove}`.toString()).walkable) {
+            return [xToMove, yToMove];
+        } else {
+            return [this.x, this.y];
+        }
+    }
+
+    public move() {
+
+        let xToMove, yToMove;
+
+        if (ROT.RNG.getUniform() > 0.5) {
+            [xToMove, yToMove] = this.getPathfindingStep();
+        } else {
+            [xToMove, yToMove] = this.getRandomStep();
+        }
+
+        // if moving onto the coin, grab it:
+        const entityAtPosition = entityList.find(entity => entity.x === xToMove && entity.y === yToMove)
+
+        if (entityAtPosition) {
+            switch (entityAtPosition.type) {
+                case 'coin':
+                    this.coins += 1;
+                    const indexToDelete = entityList.findIndex(entity => entity.x === xToMove && entity.y === yToMove)
+                    entityList.splice(indexToDelete, 1);
+            }
+        }
+
+        this.x = xToMove;
+        this.y = yToMove;
+
     }
 }
 
