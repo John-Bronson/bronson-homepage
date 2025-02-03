@@ -373,5 +373,6 @@ function renderSkullArt() {
 renderSkullArt()
 
 // TODO: Bat needs to handle situation where no coins are left
+// TODO: When bat reaches the stairs and has 3 coins, it should win the game
+// TODO: When the player reaches the stairs and has 3 coins, they should win the game.
 // TODO: Implement game state. Initialize with skull art, move to instructions, move to gameplay, move to endgame.
-// TODO: Figure out final game rules. Bat gets 3 coins then runs for stairs?
