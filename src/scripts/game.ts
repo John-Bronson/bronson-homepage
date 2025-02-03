@@ -107,7 +107,24 @@ class Bat extends Entity {
 
     coins: number;
 
-    public findClosestCoin(): Entity {
+    private getStepToStairs(): [number,number] {
+        let stairs: Entity | undefined;
+
+        stairs = entityList.find(entity => entity['type'] === 'stairs');
+
+        let stairsPath = new ROT.Path.Dijkstra(stairs.x, stairs.y, (x,y) => {
+            return map.get(`${x},${y}`.toString()).walkable;
+        }, {topology: 4});
+
+        const batMovesArray: [number, number][] = [];
+        stairsPath.compute(bat.x, bat.y, (x,y) => {
+            batMovesArray.push([x,y]);
+        })
+
+        return batMovesArray[1];
+    }
+
+    private findClosestCoin(): Entity {
         let closestCoin: Entity;
         let shortestDistance = Infinity;
 
@@ -128,25 +145,16 @@ class Bat extends Entity {
     }
 
     private getPathfindingStep() {
-        // test out that Dijkstra shit
-
         let closestCoin = this.findClosestCoin();
 
         let batPath = new ROT.Path.Dijkstra(closestCoin.x, closestCoin.y, (x, y) => {
-                return map.get(`${x},${y}`.toString()).walkable;
-            },
-            {
-                topology: 4
-            })
+            return map.get(`${x},${y}`.toString()).walkable;
+        }, {topology: 4})
 
         const batMovesArray: [number, number][] = [];
-
         batPath.compute(bat.x, bat.y, (x, y) => {
-            display.drawText(x, y, 'o');
             batMovesArray.push([x, y])
         })
-
-        console.log('batMovesArray: ', batMovesArray);
         return batMovesArray[1];
     }
 
@@ -187,26 +195,35 @@ class Bat extends Entity {
 
         let xToMove, yToMove;
 
-        if (ROT.RNG.getUniform() > 0.5) {
-            [xToMove, yToMove] = this.getPathfindingStep();
-        } else {
-            [xToMove, yToMove] = this.getRandomStep();
-        }
-
-        // if moving onto the coin, grab it:
-        const entityAtPosition = entityList.find(entity => entity.x === xToMove && entity.y === yToMove)
-
-        if (entityAtPosition) {
-            switch (entityAtPosition.type) {
-                case 'coin':
-                    this.coins += 1;
-                    const indexToDelete = entityList.findIndex(entity => entity.x === xToMove && entity.y === yToMove)
-                    entityList.splice(indexToDelete, 1);
+        if (this.coins < 3) {
+            if (ROT.RNG.getUniform() > 0.5) {
+                [xToMove, yToMove] = this.getPathfindingStep();
+            } else {
+                [xToMove, yToMove] = this.getRandomStep();
             }
-        }
 
-        this.x = xToMove;
-        this.y = yToMove;
+            // if moving onto the coin, grab it:
+            const entityAtPosition = entityList.find(entity => entity.x === xToMove && entity.y === yToMove)
+
+            if (entityAtPosition) {
+                switch (entityAtPosition.type) {
+                    case 'coin':
+                        this.coins += 1;
+                        const indexToDelete = entityList.findIndex(entity => entity.x === xToMove && entity.y === yToMove)
+                        entityList.splice(indexToDelete, 1);
+                }
+            }
+
+            this.x = xToMove;
+            this.y = yToMove;
+        } else {
+            // run for the stairs
+
+            [xToMove, yToMove] = this.getStepToStairs();
+
+            this.x = xToMove;
+            this.y = yToMove;
+        }
 
     }
 }
@@ -354,3 +371,7 @@ function renderSkullArt() {
 
 // Start the game
 renderSkullArt()
+
+// TODO: Bat needs to handle situation where no coins are left
+// TODO: Implement game state. Initialize with skull art, move to instructions, move to gameplay, move to endgame.
+// TODO: Figure out final game rules. Bat gets 3 coins then runs for stairs?
