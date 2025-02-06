@@ -3,7 +3,6 @@ import asciiArt from './asciiArt.ts';
 
 // Render the game
 function startGameRender() {
-    // document.body.appendChild(display.getContainer());
     const container = document.getElementById('ascii-container');
     if (container) {
         container.innerHTML = '';
@@ -329,7 +328,7 @@ function handleInput(event: Event) {
 }
 
 // Game initialization
-export function init() {
+function init() {
     if (!gameStarted) {
         generateMap();
         placeEntities();
@@ -338,12 +337,21 @@ export function init() {
         window.addEventListener('keydown', handleInput);
         gameStarted = true;
     }
-
 }
 
-function renderSkullArt() {
-    // Wait for the DOM to load
-    window.addEventListener('DOMContentLoaded', () => {
+const container = document.getElementById('ascii-container');
+if (container) {
+    asciiArt.forEach((line, lineIndex) => {
+        const lineElement = document.createElement('div');
+        lineElement.textContent = line.join('');
+        container.appendChild(lineElement);
+    });
+} else {
+    console.error("Container element not found. Could not render ASCII art.");
+}
+
+export function renderSkullArt() {
+    window.addEventListener('DOMContentLoaded', () => { // Wait for the DOM to load
         if (!gameStarted) {
             const asciiContainer = document.getElementById('ascii-container');
 
@@ -356,17 +364,6 @@ function renderSkullArt() {
         }
 
     });
-
-    const container = document.getElementById('ascii-container');
-    if (container) {
-        asciiArt.forEach((line, lineIndex) => {
-            const lineElement = document.createElement('div');
-            lineElement.textContent = line.join('');
-            container.appendChild(lineElement);
-        });
-    } else {
-        console.error("Container element not found. Could not render ASCII art.");
-    }
 }
 
 // Start the game
