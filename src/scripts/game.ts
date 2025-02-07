@@ -328,7 +328,10 @@ function handleInput(event: Event) {
 }
 
 // Game initialization
-function init() {
+export function init() {
+
+    renderSkullArt();
+
     if (!gameStarted) {
         generateMap();
         placeEntities();
@@ -341,6 +344,7 @@ function init() {
 
 const container = document.getElementById('ascii-container');
 if (container) {
+    console.log('drawing skull art')
     asciiArt.forEach((line, lineIndex) => {
         const lineElement = document.createElement('div');
         lineElement.textContent = line.join('');
@@ -351,6 +355,7 @@ if (container) {
 }
 
 export function renderSkullArt() {
+    console.log('renderSkullArt');
     window.addEventListener('DOMContentLoaded', () => { // Wait for the DOM to load
         if (!gameStarted) {
             const asciiContainer = document.getElementById('ascii-container');
@@ -366,10 +371,9 @@ export function renderSkullArt() {
     });
 }
 
-// Start the game
-renderSkullArt()
-
 // TODO: Bat needs to handle situation where no coins are left
 // TODO: When bat reaches the stairs and has 3 coins, it should win the game
 // TODO: When the player reaches the stairs and has 3 coins, they should win the game.
 // TODO: Implement game state. Initialize with skull art, move to instructions, move to gameplay, move to endgame.
+
+renderSkullArt();
