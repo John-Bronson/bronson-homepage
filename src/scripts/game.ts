@@ -306,39 +306,7 @@ function drawMap() {
     display.drawText(0, 35, lastMessage);
 }
 
-// function movePlayer(dx, dy) {
-//     const newX = player.x + dx;
-//     const newY = player.y + dy;
-//
-//     const movingTo = map.get(`${newX},${newY}`.toString());
-//
-//     if (map.get(`${newX},${newY}`.toString()).walkable) {
-//         player.x = newX;
-//         player.y = newY;
-//     }
-// }
-
-// Handle input
-function handleInput(event: Event) {
-    switch (event.key) {
-        case 'ArrowUp':
-            handleTurn(0, -1);
-            break;
-        case 'ArrowDown':
-            handleTurn(0, 1);
-            break;
-        case 'ArrowLeft':
-            handleTurn(-1, 0);
-            break;
-        case 'ArrowRight':
-            handleTurn(1, 0);
-            break;
-    }
-    drawMap();
-}
-
 enum GameState {
-    INIT,
     INSTRUCTIONS,
     MAIN,
     END
@@ -346,13 +314,12 @@ enum GameState {
 
 class OOPGameEngine {
 
-    GameState = GameState.INIT;
+    GameState = GameState.INSTRUCTIONS;
 
     constructor() {
         console.log('adding event listener:')
         window.addEventListener('keydown', (event) => {
             this.gameLoop(event.key)
-
         });
 
         // Render the skull ASCII art
@@ -368,19 +335,31 @@ class OOPGameEngine {
         } else {
             console.error("Container element not found. Could not render ASCII art.");
         }
+
+        window.addEventListener('DOMContentLoaded', () => { // Wait for the DOM to load
+            const asciiContainer = document.getElementById('ascii-container');
+
+            if (asciiContainer) {
+                const handleClick = () => {
+                    console.log('holy crap you clicked on the ascii container.')
+                    this.gameLoop('a');
+                    asciiContainer.removeEventListener('click', handleClick);
+                }
+                asciiContainer.addEventListener('click', handleClick);
+            } else {
+                console.log('asciiContainer not found. Could not initialize game.');
+            }
+        });
     }
 
     gameLoop(keyPressed: string) {
         console.log(`user pressed ${keyPressed}`)
         switch (this.GameState) {
-            case GameState.INIT:
-                this.splashScreen();
-                break;
             case GameState.INSTRUCTIONS:
                 this.instructions();
                 break;
             case GameState.MAIN:
-                this.mainGame();
+                this.mainGame(keyPressed);
                 break;
             case GameState.END:
                 this.endGame();
@@ -388,20 +367,32 @@ class OOPGameEngine {
         }
     }
 
-    splashScreen() {
-        console.log('splash screen');
-
-        this.GameState = GameState.INSTRUCTIONS;
-    }
-
     instructions() {
         console.log('instructions');
+        generateMap();
+        placeEntities();
+        startGameRender();
+        display.drawText(0, 0, `Get 3 coins and escape before the Bat does!`);
+        display.drawText(0, 1, `Press any key to start.`);
         this.GameState = GameState.MAIN;
     }
 
-    mainGame() {
-        console.log('main game');
-        this.GameState = GameState.END;
+    mainGame(keyPressed: string) {
+        switch (keyPressed) {
+            case 'ArrowUp':
+                handleTurn(0, -1);
+                break;
+            case 'ArrowDown':
+                handleTurn(0, 1);
+                break;
+            case 'ArrowLeft':
+                handleTurn(-1, 0);
+                break;
+            case 'ArrowRight':
+                handleTurn(1, 0);
+                break;
+        }
+        drawMap();
     }
 
     endGame() {
@@ -411,46 +402,37 @@ class OOPGameEngine {
 }
 
 
-const GameEngine = (() => {
-    enum GameState {
-        StartScreen = "StartScreen",
-        Instructions = "Instructions",
-        MainGame = "MainGame",
-        EndGame = "EndGame"
-    }
-
-    let gameState: GameState = GameState.StartScreen;
-
-    return {
-        initializeGame() {
-            console.log('initializeGame:', gameState);
-
-            window.addEventListener('DOMContentLoaded', () => { // Wait for the DOM to load
-                const asciiContainer = document.getElementById('ascii-container');
-
-                if (asciiContainer) {
-                    const handleClick = () => {
-                        gameState = GameState.MainGame;
-                        gameLoop();
-                        asciiContainer.removeEventListener('click', handleClick);
-                    }
-                    asciiContainer.addEventListener('click', handleClick);
-                } else {
-                    console.log('asciiContainer not found. Could not initialize game.');
-                }
-            });
-        }
-    };
-})();
-
-// Main Game Loop
-function gameLoop() {
-    generateMap();
-    placeEntities();
-    startGameRender();
-    drawMap();
-    window.addEventListener('keydown', handleInput);
-}
+// const GameEngine = (() => {
+//     enum GameState {
+//         StartScreen = "StartScreen",
+//         Instructions = "Instructions",
+//         MainGame = "MainGame",
+//         EndGame = "EndGame"
+//     }
+//
+//     let gameState: GameState = GameState.StartScreen;
+//
+//     return {
+//         initializeGame() {
+//             console.log('initializeGame:', gameState);
+//
+//             window.addEventListener('DOMContentLoaded', () => { // Wait for the DOM to load
+//                 const asciiContainer = document.getElementById('ascii-container');
+//
+//                 if (asciiContainer) {
+//                     const handleClick = () => {
+//                         gameState = GameState.MainGame;
+//                         gameLoop();
+//                         asciiContainer.removeEventListener('click', handleClick);
+//                     }
+//                     asciiContainer.addEventListener('click', handleClick);
+//                 } else {
+//                     console.log('asciiContainer not found. Could not initialize game.');
+//                 }
+//             });
+//         }
+//     };
+// })();
 
 // TODO: Spend all your coins to teleport the bat to a random location
 // TODO: If the player has 3 or more coins and is near a door, maybe the bat teleports the player
