@@ -385,7 +385,8 @@ export function renderSkullArt() {
     });
 }
 
-// TODO: Spend 1 coint to teleport the bat to a random location
+// TODO: Spend all your coins to teleport the bat to a random location
+// TODO: If the player has 3 or more coins and is near a door, maybe the bat teleports the player
 // TODO: Bat needs to handle situation where no coins are left
 // TODO: When bat reaches the stairs and has 3 coins, it should win the game
 // TODO: When the player reaches the stairs and has 3 coins, they should win the game.
