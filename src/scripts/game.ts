@@ -398,7 +398,10 @@ class OOPGameEngine {
 
     endGame() {
         console.log('end game');
-        this.GameState = GameState.INSTRUCTIONS;
+        display.clear();
+        display.drawText(0, 0, `You won!`);
+        display.drawText(0, 1, `Press any key to restart.`);
+        // this.GameState = GameState.INSTRUCTIONS;
     }
 }
 
