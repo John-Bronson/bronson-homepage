@@ -31,7 +31,7 @@ console.log('RNG seed is: ', ROT.RNG.getSeed())
 const map = new Map();
 const entityList: Entity[] = [];
 let gameStarted = false;
-let player: Entity;
+let player: Player;
 let bat: Bat;
 let lastMessage = '';
 
@@ -226,18 +226,14 @@ class Bat extends Creature {
                         entityList.splice(indexToDelete, 1);
                 }
             }
-
             this.x = xToMove;
             this.y = yToMove;
         } else {
             // run for the stairs
-
             [xToMove, yToMove] = this.getStepToStairs();
-
             this.x = xToMove;
             this.y = yToMove;
         }
-
     }
 }
 
@@ -341,48 +337,79 @@ function handleInput(event: Event) {
     drawMap();
 }
 
-// Game initialization
-export function init() {
+enum GameState {
+    INIT,
+    INSTRUCTIONS,
+    MAIN,
+    END
+}
 
-    renderSkullArt();
+class OOPGameEngine {
 
-    if (!gameStarted) {
-        generateMap();
-        placeEntities();
-        startGameRender();
-        drawMap();
-        window.addEventListener('keydown', handleInput);
-        gameStarted = true;
+    GameState = GameState.INIT;
+
+    constructor() {
+    }
+
+    gameLoop() {
+        console.log('gameLoop:', this.GameState);
     }
 }
 
-const container = document.getElementById('ascii-container');
-if (container) {
-    console.log('drawing skull art')
-    asciiArt.forEach((line, lineIndex) => {
-        const lineElement = document.createElement('div');
-        lineElement.textContent = line.join('');
-        container.appendChild(lineElement);
-    });
-} else {
-    console.error("Container element not found. Could not render ASCII art.");
-}
 
-export function renderSkullArt() {
-    console.log('renderSkullArt');
-    window.addEventListener('DOMContentLoaded', () => { // Wait for the DOM to load
-        if (!gameStarted) {
-            const asciiContainer = document.getElementById('ascii-container');
+const GameEngine = (() => {
+    enum GameState {
+        StartScreen = "StartScreen",
+        Instructions = "Instructions",
+        MainGame = "MainGame",
+        EndGame = "EndGame"
+    }
 
-            // Attach the click event to the container
-            if (asciiContainer) {
-                asciiContainer.addEventListener('click', () => {
-                    init(); // Run the game initialization when the container is clicked
+    let gameState: GameState = GameState.StartScreen;
+
+    return {
+        initializeGame() {
+            console.log('initializeGame:', gameState);
+
+            // Render the skull ASCII art
+            // TODO: Do this with the rot.js display instead
+            const container = document.getElementById('ascii-container');
+            if (container) {
+                console.log('drawing skull art')
+                asciiArt.forEach((line, lineIndex) => {
+                    const lineElement = document.createElement('div');
+                    lineElement.textContent = line.join('');
+                    container.appendChild(lineElement);
                 });
+            } else {
+                console.error("Container element not found. Could not render ASCII art.");
             }
-        }
 
-    });
+            window.addEventListener('DOMContentLoaded', () => { // Wait for the DOM to load
+                const asciiContainer = document.getElementById('ascii-container');
+
+                if (asciiContainer) {
+                    const handleClick = () => {
+                        gameState = GameState.MainGame;
+                        gameLoop();
+                        asciiContainer.removeEventListener('click', handleClick);
+                    }
+                    asciiContainer.addEventListener('click', handleClick);
+                } else {
+                    console.log('asciiContainer not found. Could not initialize game.');
+                }
+            });
+        }
+    };
+})();
+
+// Game initialization
+function gameLoop() {
+    generateMap();
+    placeEntities();
+    startGameRender();
+    drawMap();
+    window.addEventListener('keydown', handleInput);
 }
 
 // TODO: Spend all your coins to teleport the bat to a random location
@@ -392,4 +419,8 @@ export function renderSkullArt() {
 // TODO: When the player reaches the stairs and has 3 coins, they should win the game.
 // TODO: Implement game state. Initialize with skull art, move to instructions, move to gameplay, move to endgame.
 
-renderSkullArt();
+export function init() {
+    GameEngine.initializeGame();
+}
+
+init();
