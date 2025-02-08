@@ -55,13 +55,21 @@ class Entity {
     }
 }
 
-class Player extends Entity {
+abstract class Creature extends Entity {
+    abstract takeDamage(amount: number): void;
+}
+
+class Player extends Creature {
     constructor() {
         super('@', '#0f0', '#000', 'player');
         this.coins = 0;
     }
 
     coins: number;
+
+    public takeDamage(amount: number) {
+        console.log(`ouch! The game wants you to take ${amount} damage!`);
+    }
 
     public move(xIndex: number, yIndex: number) {
         const xToMove = this.x + xIndex;
@@ -94,11 +102,12 @@ class Player extends Entity {
 
         } else {
             lastMessage = 'You bump into a wall.';
+            this.takeDamage(1);
         }
     }
 }
 
-class Bat extends Entity {
+class Bat extends Creature {
     constructor() {
         super('b', '#f00', '#000', 'bat')
         this.coins = 0;
@@ -106,18 +115,22 @@ class Bat extends Entity {
 
     coins: number;
 
-    private getStepToStairs(): [number,number] {
+    private takeDamage(amount: number) {
+        console.log(`the bat takes ${amount} damage!`);
+    }
+
+    private getStepToStairs(): [number, number] {
         let stairs: Entity | undefined;
 
         stairs = entityList.find(entity => entity['type'] === 'stairs');
 
-        let stairsPath = new ROT.Path.Dijkstra(stairs.x, stairs.y, (x,y) => {
+        let stairsPath = new ROT.Path.Dijkstra(stairs.x, stairs.y, (x, y) => {
             return map.get(`${x},${y}`.toString()).walkable;
         }, {topology: 4});
 
         const batMovesArray: [number, number][] = [];
-        stairsPath.compute(bat.x, bat.y, (x,y) => {
-            batMovesArray.push([x,y]);
+        stairsPath.compute(bat.x, bat.y, (x, y) => {
+            batMovesArray.push([x, y]);
         })
 
         return batMovesArray[1];
@@ -186,6 +199,7 @@ class Bat extends Entity {
         if (map.get(`${xToMove},${yToMove}`.toString()).walkable) {
             return [xToMove, yToMove];
         } else {
+            this.takeDamage(1);
             return [this.x, this.y];
         }
     }
