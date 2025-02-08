@@ -209,30 +209,32 @@ class Bat extends Creature {
         let xToMove: number, yToMove: number;
 
         if (this.coins < 3) {
+            // move toward the nearest coin
             [xToMove, yToMove] = this.getPathfindingStep();
-            // if moving onto the coin, grab it:
-            const entityAtPosition = entityList.find(entity => entity.x === xToMove && entity.y === yToMove)
-
-            if (entityAtPosition) {
-                switch (entityAtPosition.type) {
-                    case 'coin':
-                        this.coins += 1;
-                        const indexToDelete = entityList.findIndex(entity => entity.x === xToMove && entity.y === yToMove)
-                        entityList.splice(indexToDelete, 1);
-                        break;
-                    case `stairs`:
-                        console.log('bat found the stairs!')
-                    // gameEngine.GameState = GameState.END;
-                }
-            }
-            this.x = xToMove;
-            this.y = yToMove;
         } else {
-            // run for the stairs
+            // move toward the stairs
             [xToMove, yToMove] = this.getStepToStairs();
-            this.x = xToMove;
-            this.y = yToMove;
         }
+
+        // Handle movement into other Entities
+        const entityAtPosition = entityList.find(entity => entity.x === xToMove && entity.y === yToMove)
+
+        if (entityAtPosition) {
+            switch (entityAtPosition.type) {
+                case 'coin':
+                    this.coins += 1;
+                    const indexToDelete = entityList.findIndex(entity => entity.x === xToMove && entity.y === yToMove)
+                    entityList.splice(indexToDelete, 1);
+                    break;
+                case `stairs`:
+                    console.log('bat found the stairs!')
+                    gameEngine.GameState = GameState.END;
+            }
+        }
+
+        this.x = xToMove;
+        this.y = yToMove;
+
     }
 }
 
