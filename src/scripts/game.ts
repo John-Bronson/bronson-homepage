@@ -115,25 +115,8 @@ class Bat extends Creature {
 
     coins: number;
 
-    private takeDamage(amount: number) {
+    takeDamage(amount: number) {
         console.log(`the bat takes ${amount} damage!`);
-    }
-
-    private getStepToStairs(): [number, number] {
-        let stairs: Entity | undefined;
-
-        stairs = entityList.find(entity => entity['type'] === 'stairs');
-
-        let stairsPath = new ROT.Path.Dijkstra(stairs.x, stairs.y, (x, y) => {
-            return map.get(`${x},${y}`.toString()).walkable;
-        }, {topology: 4});
-
-        const batMovesArray: [number, number][] = [];
-        stairsPath.compute(bat.x, bat.y, (x, y) => {
-            batMovesArray.push([x, y]);
-        })
-
-        return batMovesArray[1];
     }
 
     private findClosestCoin(): Entity {
@@ -204,17 +187,29 @@ class Bat extends Creature {
         }
     }
 
+    private getStepToStairs(): [number, number] {
+        let stairs: Entity | undefined;
+
+        stairs = entityList.find(entity => entity['type'] === 'stairs');
+
+        let stairsPath = new ROT.Path.Dijkstra(stairs.x, stairs.y, (x, y) => {
+            return map.get(`${x},${y}`.toString()).walkable;
+        }, {topology: 4});
+
+        const batMovesArray: [number, number][] = [];
+        stairsPath.compute(bat.x, bat.y, (x, y) => {
+            batMovesArray.push([x, y]);
+        })
+
+        return batMovesArray[1];
+    }
+
     public move() {
 
-        let xToMove, yToMove;
+        let xToMove: number, yToMove: number;
 
         if (this.coins < 3) {
-            if (ROT.RNG.getUniform() > 0.5) {
-                [xToMove, yToMove] = this.getPathfindingStep();
-            } else {
-                [xToMove, yToMove] = this.getRandomStep();
-            }
-
+            [xToMove, yToMove] = this.getPathfindingStep();
             // if moving onto the coin, grab it:
             const entityAtPosition = entityList.find(entity => entity.x === xToMove && entity.y === yToMove)
 
@@ -224,6 +219,10 @@ class Bat extends Creature {
                         this.coins += 1;
                         const indexToDelete = entityList.findIndex(entity => entity.x === xToMove && entity.y === yToMove)
                         entityList.splice(indexToDelete, 1);
+                        break;
+                    case `stairs`:
+                        console.log('bat found the stairs!')
+                    // gameEngine.GameState = GameState.END;
                 }
             }
             this.x = xToMove;
