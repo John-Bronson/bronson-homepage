@@ -349,10 +349,64 @@ class OOPGameEngine {
     GameState = GameState.INIT;
 
     constructor() {
+        console.log('adding event listener:')
+        window.addEventListener('keydown', (event) => {
+            this.gameLoop(event.key)
+
+        });
+
+        // Render the skull ASCII art
+        // TODO: Do this with the rot.js display instead
+        const container = document.getElementById('ascii-container');
+        if (container) {
+            console.log('drawing skull art')
+            asciiArt.forEach((line, lineIndex) => {
+                const lineElement = document.createElement('div');
+                lineElement.textContent = line.join('');
+                container.appendChild(lineElement);
+            });
+        } else {
+            console.error("Container element not found. Could not render ASCII art.");
+        }
     }
 
-    gameLoop() {
-        console.log('gameLoop:', this.GameState);
+    gameLoop(keyPressed: string) {
+        console.log(`user pressed ${keyPressed}`)
+        switch (this.GameState) {
+            case GameState.INIT:
+                this.splashScreen();
+                break;
+            case GameState.INSTRUCTIONS:
+                this.instructions();
+                break;
+            case GameState.MAIN:
+                this.mainGame();
+                break;
+            case GameState.END:
+                this.endGame();
+                break;
+        }
+    }
+
+    splashScreen() {
+        console.log('splash screen');
+
+        this.GameState = GameState.INSTRUCTIONS;
+    }
+
+    instructions() {
+        console.log('instructions');
+        this.GameState = GameState.MAIN;
+    }
+
+    mainGame() {
+        console.log('main game');
+        this.GameState = GameState.END;
+    }
+
+    endGame() {
+        console.log('end game');
+        this.GameState = GameState.INSTRUCTIONS;
     }
 }
 
@@ -370,20 +424,6 @@ const GameEngine = (() => {
     return {
         initializeGame() {
             console.log('initializeGame:', gameState);
-
-            // Render the skull ASCII art
-            // TODO: Do this with the rot.js display instead
-            const container = document.getElementById('ascii-container');
-            if (container) {
-                console.log('drawing skull art')
-                asciiArt.forEach((line, lineIndex) => {
-                    const lineElement = document.createElement('div');
-                    lineElement.textContent = line.join('');
-                    container.appendChild(lineElement);
-                });
-            } else {
-                console.error("Container element not found. Could not render ASCII art.");
-            }
 
             window.addEventListener('DOMContentLoaded', () => { // Wait for the DOM to load
                 const asciiContainer = document.getElementById('ascii-container');
@@ -403,7 +443,7 @@ const GameEngine = (() => {
     };
 })();
 
-// Game initialization
+// Main Game Loop
 function gameLoop() {
     generateMap();
     placeEntities();
@@ -419,8 +459,4 @@ function gameLoop() {
 // TODO: When the player reaches the stairs and has 3 coins, they should win the game.
 // TODO: Implement game state. Initialize with skull art, move to instructions, move to gameplay, move to endgame.
 
-export function init() {
-    GameEngine.initializeGame();
-}
-
-init();
+export const gameEngine = new OOPGameEngine();
