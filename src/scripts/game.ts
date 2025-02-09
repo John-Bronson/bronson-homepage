@@ -30,7 +30,6 @@ const display = new ROT.Display({
 console.log('RNG seed is: ', ROT.RNG.getSeed())
 const map = new Map();
 const entityList: Entity[] = [];
-let gameStarted = false;
 let player: Player;
 let bat: Bat;
 let lastMessage = '';
@@ -91,7 +90,11 @@ class Player extends Creature {
                     lastMessage = 'You touch a bat!';
                     break;
                 case 'stairs':
-                    lastMessage = 'You found the stairs!';
+                    if (this.coins < 3) {
+                        lastMessage = 'You need 3 coins to use the stairs.';
+                    } else {
+                        gameEngine.gameOver('You beat the bat! You win!');
+                    }
                     break;
             }
         }
@@ -227,8 +230,7 @@ class Bat extends Creature {
                     entityList.splice(indexToDelete, 1);
                     break;
                 case `stairs`:
-                    console.log('bat found the stairs!')
-                    gameEngine.GameState = GameState.END;
+                    gameEngine.gameOver('The Bat beat you! You lose!')
             }
         }
 
@@ -285,11 +287,6 @@ function findBlankPosition() {
     }
 }
 
-function handleTurn(x: number, y: number) {
-    player.move(x, y);
-    bat.move();
-    drawMap();
-}
 
 function drawMap() {
     display.clear();
@@ -313,9 +310,10 @@ enum GameState {
     END
 }
 
-class OOPGameEngine {
+class GameEngine {
 
     GameState = GameState.INSTRUCTIONS;
+    gameOverMessage = '';
 
     constructor() {
         console.log('adding event listener:')
@@ -354,7 +352,6 @@ class OOPGameEngine {
     }
 
     gameLoop(keyPressed: string) {
-        console.log(`user pressed ${keyPressed}`)
         switch (this.GameState) {
             case GameState.INSTRUCTIONS:
                 this.instructions();
@@ -363,10 +360,14 @@ class OOPGameEngine {
                 this.mainGame(keyPressed);
                 break;
             case GameState.END:
-                this.endGame();
+                this.endGame(keyPressed);
                 break;
         }
+        if (this.GameState === GameState.END) {
+            this.endGame(keyPressed);
+        }
     }
+
 
     instructions() {
         console.log('instructions');
@@ -381,68 +382,50 @@ class OOPGameEngine {
     mainGame(keyPressed: string) {
         switch (keyPressed) {
             case 'ArrowUp':
-                handleTurn(0, -1);
+                this.handleTurn(0, -1);
                 break;
             case 'ArrowDown':
-                handleTurn(0, 1);
+                this.handleTurn(0, 1);
                 break;
             case 'ArrowLeft':
-                handleTurn(-1, 0);
+                this.handleTurn(-1, 0);
                 break;
             case 'ArrowRight':
-                handleTurn(1, 0);
+                this.handleTurn(1, 0);
                 break;
         }
         drawMap();
     }
 
-    endGame() {
+    handleTurn(x: number, y: number) {
+        player.move(x, y);
+        bat.move();
+    }
+
+    endGame(keyPressed: string) {
         console.log('end game');
         display.clear();
-        display.drawText(0, 0, `You won!`);
-        display.drawText(0, 1, `Press any key to restart.`);
-        // this.GameState = GameState.INSTRUCTIONS;
+        display.drawText(0, 0, this.gameOverMessage);
+        display.drawText(0, 1, `Press 'r' to restart.`);
+        if (keyPressed === 'r') {
+            console.log('restarting game');
+            entityList.length = 0;
+            lastMessage = '';
+            this.GameState = GameState.INSTRUCTIONS;
+        }
+    }
+
+    public gameOver(result: text) {
+        this.gameOverMessage = result;
+        this.GameState = GameState.END;
+        display.clear();
     }
 }
 
-
-// const GameEngine = (() => {
-//     enum GameState {
-//         StartScreen = "StartScreen",
-//         Instructions = "Instructions",
-//         MainGame = "MainGame",
-//         EndGame = "EndGame"
-//     }
-//
-//     let gameState: GameState = GameState.StartScreen;
-//
-//     return {
-//         initializeGame() {
-//             console.log('initializeGame:', gameState);
-//
-//             window.addEventListener('DOMContentLoaded', () => { // Wait for the DOM to load
-//                 const asciiContainer = document.getElementById('ascii-container');
-//
-//                 if (asciiContainer) {
-//                     const handleClick = () => {
-//                         gameState = GameState.MainGame;
-//                         gameLoop();
-//                         asciiContainer.removeEventListener('click', handleClick);
-//                     }
-//                     asciiContainer.addEventListener('click', handleClick);
-//                 } else {
-//                     console.log('asciiContainer not found. Could not initialize game.');
-//                 }
-//             });
-//         }
-//     };
-// })();
-
+// TODO: Fix bug where extra keypress is needed after hitting 'r' to restart the game
 // TODO: Spend all your coins to teleport the bat to a random location
-// TODO: If the player has 3 or more coins and is near a door, maybe the bat teleports the player
+// TODO: If the player has 3 or more coins and is near the stairs, maybe the bat teleports the player
 // TODO: Bat needs to handle situation where no coins are left
-// TODO: When bat reaches the stairs and has 3 coins, it should win the game
-// TODO: When the player reaches the stairs and has 3 coins, they should win the game.
-// TODO: Implement game state. Initialize with skull art, move to instructions, move to gameplay, move to endgame.
+// TODO: Fully encapsulate game state into GameEngine class
 
-export const gameEngine = new OOPGameEngine();
+export const gameEngine = new GameEngine();
