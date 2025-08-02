@@ -420,7 +420,7 @@ class GameEngine {
     }
 }
 
-// TODO: Fix bug where extra keypress is needed after hitting 'r' to restart the game
+// TODO: Fix bug where extra keypress is needed after endgame
 // TODO: Spend all your coins to teleport the bat to a random location
 // TODO: If the player has 3 or more coins and is near the stairs, maybe the bat teleports the player
 // TODO: Bat needs to handle situation where no coins are left
