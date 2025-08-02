@@ -363,14 +363,13 @@ class GameEngine {
                 this.endGame(keyPressed);
                 break;
         }
-        if (this.GameState === GameState.END) {
-            this.endGame(keyPressed);
-        }
     }
 
 
     instructions() {
         console.log('instructions');
+        lastMessage = '';
+        entityList.length = 0;
         generateMap();
         placeEntities();
         startGameRender();
@@ -409,16 +408,15 @@ class GameEngine {
         display.drawText(0, 1, `Press 'r' to restart.`);
         if (keyPressed === 'r') {
             console.log('restarting game');
-            entityList.length = 0;
-            lastMessage = '';
             this.GameState = GameState.INSTRUCTIONS;
+            this.instructions();
         }
     }
 
     public gameOver(result: text) {
         this.gameOverMessage = result;
         this.GameState = GameState.END;
-        display.clear();
+        this.endGame('');
     }
 }
 
