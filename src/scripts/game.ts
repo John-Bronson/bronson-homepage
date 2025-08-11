@@ -393,7 +393,10 @@ class GameEngine {
                 this.handleTurn(1, 0);
                 break;
         }
-        drawMap();
+        if (this.GameState !== GameState.END) {
+            drawMap();
+        }
+
     }
 
     handleTurn(x: number, y: number) {
